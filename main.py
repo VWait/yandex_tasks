@@ -1,52 +1,49 @@
 import pygame
-from math import sin, cos, radians
 
 
-def create_point(degree, r, x, y):
-    return cos(radians(degree)) * r + x, \
-           sin(radians(degree)) * r + y
+def change_point(point, k, c):
+    return tuple(map(lambda x: x * k + c, list(point)))
 
 
-def draw_triangle(degree, r, center):
-    center_x = center[0]
-    center_y = center[1]
-    point_1 = create_point(degree, r, center_x, center_y)
-    point_2 = create_point(degree + 30, r, center_x, center_y)
-    pygame.draw.polygon(screen, 'white', [center, point_1, point_2], 0)
+def change_pol(points, k, center):
+    k = [k] * len(points)
+    c = [center] * len(points)
+    return list(map(change_point, points, k, c))
 
 
 if __name__ == '__main__':
     pygame.init()
     pygame.display.set_caption('Движущийся круг 2')
-    size = width, height = 201, 201
+    size = width, height = 500, 500
     screen = pygame.display.set_mode(size)
-
     running = True
     clock = pygame.time.Clock()
 
-    center = (100, 100)
-    now_pos = 75
-    h = 70
-    v = 50
+    center = width / 2
+
+    with open('points.txt', 'r') as file:
+        points = [tuple(map(float, i.replace(',', '.').split(';')))
+                  for i in file.read()[1:-1].split('), (')]
+        points = list(map(lambda x: (x[0], -x[1]), points))
+        print(points)
+    k = 20
+    points_state = points
+    points = change_pol(points, k, center)
 
     while running:
+        screen.fill((0, 0, 0))
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:
-                    v += 50
-                elif event.button == 3:
-                    v -= 50
-
-        screen.fill((0, 0, 0))
-
-        draw_triangle(now_pos, h, center)
-        draw_triangle(now_pos + 120, h, center)
-        draw_triangle(now_pos + 240, h, center)
-        pygame.draw.circle(screen, 'white', center, 10)
-        now_pos += v * clock.tick() / 1000
-
+                if event.button == 4:
+                    k *= 1.5
+                    points = change_pol(points_state, k, center)
+                if event.button == 5:
+                    k /= 1.5
+                    points = change_pol(points_state, k, center)
+        pygame.draw.polygon(screen, 'white', points, width=2)
         pygame.display.flip()
+        clock.tick(5)
 
     pygame.quit()
