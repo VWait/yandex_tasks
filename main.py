@@ -14,10 +14,9 @@ def change_pol(points, k, center):
 if __name__ == '__main__':
     pygame.init()
     pygame.display.set_caption('Движущийся круг 2')
-    size = width, height = 500, 500
+    size = width, height = 700, 700
     screen = pygame.display.set_mode(size)
     running = True
-    clock = pygame.time.Clock()
 
     center = width / 2
 
@@ -26,7 +25,8 @@ if __name__ == '__main__':
                   for i in file.read()[1:-1].split('), (')]
         points = list(map(lambda x: (x[0], -x[1]), points))
         print(points)
-    k = 20
+    k = 15
+    v = 1.2
     points_state = points
     points = change_pol(points, k, center)
 
@@ -37,13 +37,12 @@ if __name__ == '__main__':
                 running = False
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 4:
-                    k *= 1.5
+                    k *= v
                     points = change_pol(points_state, k, center)
                 if event.button == 5:
-                    k /= 1.5
+                    k /= v
                     points = change_pol(points_state, k, center)
         pygame.draw.polygon(screen, 'white', points, width=2)
         pygame.display.flip()
-        clock.tick(5)
 
     pygame.quit()
